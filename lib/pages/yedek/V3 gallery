@@ -1,0 +1,121 @@
+
+//çalışan % yüzde vermeyen hali
+/*import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite/tflite.dart';
+
+class galeri extends StatefulWidget {
+  const galeri({super.key});
+
+  @override
+  State<galeri> createState() {
+    return galeriState();
+  }
+}
+
+class galeriState extends State<galeri> {
+  late bool _loading;// Uygulama yüklendiğinde veya işlem yapıldığında kullanılacak bir yükleme durumu değişkeni
+  List? _outputs;// Model çıktıları için bir liste
+  final ImagePicker _picker = ImagePicker(); // Resim seçmek için kullanılacak ImagePicker nesnesi
+  File? _image; //_image yüklenecek dosya // Seçilen resmin dosya referansı
+
+  void initState() {
+    super.initState();
+    _loading = true;// Sayfa yüklendiğinde yükleme durumu aktif olarak ayarlanır
+
+    loadModel().then((value) {
+      setState(() {
+        _loading = false;// Model yüklendikten sonra yükleme durumu pasif hale getirilir
+      });
+    });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/vww_96_grayscale_quantized.tflite",// Modelin dosya yolu
+      labels: "assets/labels.txt",// Etiket dosyasının yolu
+    );
+  }
+
+  galeridenResimSec() async {
+    var image = await _picker.pickImage(source: ImageSource.gallery);// Galeriden resim seçilir
+    if (image == null) return null;// Resim seçilmezse fonksiyon sona erer
+    setState(() {
+      _loading = true;// İşlem başladığında yükleme durumu aktif hale getirilir
+      _image = File(image.path);// Seçilen resmin dosya referansı atanır
+    });
+    sinifliResim(_image!); // Seçilen resim sınıflandırılır
+  }
+
+  sinifliResim(File image) async {
+    var output = await Tflite.runModelOnImage(
+      path: image.path,// Resmin dosya yolu
+      numResults: 5,// Çıktıda gösterilecek sonuç sayısı
+      threshold: 0.5,// Sonuçların eşik değeri
+      //Eğer threshold değeri yüksek (örneğin 0.5 veya daha yüksek) seçilirse, model daha yüksek güven düzeyine sahip tahminleri verir.
+      // Bu, daha kesin sonuçlar elde etmenizi sağlar, ancak tahminlerin sayısı azalabilir.
+      imageMean: 127.5,// Resim normalizasyonu için ortalama değeri
+      imageStd: 127.5,// Resim normalizasyonu için standart sapma değeri
+    );
+
+    setState(() {
+      _loading = false;// İşlem tamamlandığında yükleme durumu pasif hale getirilir
+      _outputs = output!;// Model çıktıları _outputs listesine atanır
+    });
+  }
+
+  @override
+  void dispose() {//TensorFlow Lite modelini kullanım sonrası kapatmanızı sağlayacaktır.
+    // Bu sayede gereksiz bellek tüketimini ve olası hataları önlemiş olursunuz.
+    Tflite.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _loading
+          ? Container(
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(),// İşlem sürerken yükleme animasyonu gösterilir
+      ) // Container
+          : Container(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _image == null
+                ? Container() // Seçilen resim yoksa boş bir Container gösterilir
+                : Container(
+              child: Image.file(_image!),// Seçilen resim gösterilir
+              height: 500,
+              width: MediaQuery.of(context).size.width - 200,
+            ), // Container
+            SizedBox(
+              height: 20,
+            ), // SizedBox
+            _outputs!= null
+                ? Text(
+              "${_outputs?[0]["label"]}"// Modelin tahmin ettiği sonuç gösterilir
+                  .replaceAll(RegExp(r' [0-9]'), ''),
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                  background: Paint()..color = Colors.white,//metin için belirtilen stili oluştururken metin arkaplanının da beyaz olmasını sağlar.
+                  fontWeight: FontWeight.bold), // TextStyle
+            )
+                : Text("Sınıflandırma bekleniyor"),// Sonuç yoksa bekleniyor mesajı gösterilir
+          ],
+        ), // Column
+      ), // Container
+      floatingActionButton: FloatingActionButton(
+        onPressed: galeridenResimSec,
+        tooltip: 'resim seç',
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+*/

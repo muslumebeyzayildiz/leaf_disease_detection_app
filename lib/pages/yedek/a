@@ -1,0 +1,225 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite/tflite.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'hastalikDetay.dart';
+import 'package:lottie/lottie.dart';
+//TODO GALLERY ANİMASYONDAN ÖNCEKİ
+class galeri extends StatefulWidget {
+  const galeri({super.key});
+
+  @override
+  State<galeri> createState() {
+    return galeriState();
+  }
+}
+/* _outputs![0]["label"]; GENEL NEDEN [0] KULLANIYORUZ AÇIKLAMA
+_outputs = [
+  {"label": "healthy", "confidence": 0.95},
+  {"label": "bacterial_spot", "confidence": 0.04},
+  // diğer sınıflandırmalar
+];
+Bu durumda _outputs![0] ifadesi, ilk öğeyi yani "healthy" hastalığı ve onun güven değerini içeren bir harita gibi görünen bir nesneyi ifade eder.
+"label" alanı hastalık adını, "confidence" alanı ise tespit güvenilirliğini içerir.*/
+
+class galeriState extends State<galeri> {
+  late bool _loading;// Uygulama yüklendiğinde veya işlem yapıldığında kullanılacak bir yükleme durumu değişkeni
+  List? _outputs;// Model çıktıları için bir liste
+  final ImagePicker _picker = ImagePicker(); // Resim seçmek için kullanılacak ImagePicker nesnesi
+  File? _image; //_image yüklenecek dosya // Seçilen resmin dosya referansı
+  bool _showAnimation = true; // Animasyonun görünürlüğünü kontrol etmek için bir değişken ekledik
+
+  void initState() {
+    super.initState();
+    _loading = true;// Sayfa yüklendiğinde yükleme durumu aktif olarak ayarlanır
+
+    loadModel().then((value) {
+      setState(() {
+        _loading = false;// Model yüklendikten sonra yükleme durumu pasif hale getirilir
+      });
+    });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/vww_96_grayscale_quantized.tflite",// Modelin dosya yolu
+      labels: "assets/labels.txt",// Etiket dosyasının yolu
+    );
+  }
+
+  galeridenResimSec() async {
+    var image = await _picker.pickImage(source: ImageSource.gallery);// Galeriden resim seçilir
+    if (image == null) return null;// Resim seçilmezse fonksiyon sona erer
+    setState(() {
+      _loading = true;// İşlem başladığında yükleme durumu aktif hale getirilir
+      _image = File(image.path);// Seçilen resmin dosya referansı atanır
+
+      _showAnimation = true; // Resim seçildiğinde animasyonun görünürlüğünü true olarak ayarladık
+
+    });
+    sinifliResim(_image!); // Seçilen resim sınıflandırılır
+  }
+
+  sinifliResim(File image) async {
+    var output = await Tflite.runModelOnImage(
+      path: image.path,// Resmin dosya yolu
+      numResults: 5,// Çıktıda gösterilecek sonuç sayısı
+      threshold: 0.5,// Sonuçların eşik değeri
+      //Eğer threshold değeri yüksek (örneğin 0.5 veya daha yüksek) seçilirse, model daha yüksek güven düzeyine sahip tahminleri verir.
+      // Bu, daha kesin sonuçlar elde etmenizi sağlar, ancak tahminlerin sayısı azalabilir.
+      imageMean: 127.5,// Resim normalizasyonu için ortalama değeri
+      imageStd: 127.5,// Resim normalizasyonu için standart sapma değeri
+    );
+
+    setState(() {
+      _loading = false;// İşlem tamamlandığında yükleme durumu pasif hale getirilir
+      _outputs = output!;// Model çıktıları _outputs listesine atanır
+    });
+
+    if (_outputs != null && _outputs!.isNotEmpty) {
+      //tespit sonuçlarının mevcut ve geçerli olduğunda, yani tespit yapıldığında, tespit sonuçlarını Firestore'a kaydetmek için kullanılır.
+      // Böylece her tespit sonucu, hastalık adı, başarı yüzdesi ve tarih bilgisi ile birlikte Firestore'a eklenir.
+      String hastalikAdi = _outputs![0]["label"];
+      double basari = _outputs![0]["confidence"] * 100;
+      kaydetTespitSonucu(hastalikAdi, basari);
+    }
+  }
+
+
+  Future<void> kaydetTespitSonucu(String hastalikAdi, double basari) async {
+    DateTime now = DateTime.now();
+    // Şu anki tarih ve saat bilgisini alıyoruz
+    try {
+      // 'tespitGecmisi' koleksiyonuna yeni bir belge ekliyoruz
+      await FirebaseFirestore.instance.collection('tespitGecmisi').add({
+        'tarih': now,
+        'hastalikAdi': hastalikAdi,
+        'basari': basari,
+      });
+      print('Tespit sonucu Firestore\'a eklendi');
+    } catch (e) {
+      print('Firestore\'a veri eklenirken hata oluştu: $e');
+    }
+  }
+
+
+  @override
+  void dispose() {//TensorFlow Lite modelini kullanım sonrası kapatmanızı sağlayacaktır.
+    // Bu sayede gereksiz bellek tüketimini ve olası hataları önlemiş olursunuz.
+    Tflite.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _loading
+          ? Container(
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(),// İşlem sürerken yükleme animasyonu gösterilir
+      ) // Container
+          : SingleChildScrollView(
+    child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _image == null
+                ? Container() // Seçilen resim yoksa boş bir Container gösterilir
+                : Container(
+              child: Image.file(_image!),// Seçilen resim gösterilir
+              height: 500,
+              width: MediaQuery.of(context).size.width - 200,
+            ), // Container
+            SizedBox(
+              height: 20,
+            ), // SizedBox
+            _outputs!= null && _outputs!.isNotEmpty//_outputs!= null böyleydi && _outputs!.isNotEmpty eklenince
+            //_outputs değişkeninin null olmadığını ve içeriğinin boş olmadığını kontrol eder.
+            // Bu kontrol, sınıflandırma sonuçlarının mevcut ve geçerli olduğundan emin olmak için yapılır.
+            // Eğer _outputs değişkeni null ise veya içeriği boşsa, sınıflandırma sonuçlarının gösterilmesi yerine "Sınıflandırma bekleniyor" mesajının gösterilmesini sağlar.
+
+                ? Column(
+              children: [
+                Text(//Tespit Edilen Hastalık:
+                  " ${_outputs?[0]["label"]}",
+                     // .replaceAll(RegExp(r' [0-9]'), ''),//1 healthy değilde healthy desin
+                  // bir şey değişmiyordu ama
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.0,
+                    background: Paint()..color = Colors.white,//yazının arkaplan rengi
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Başarı Oranı: ${(_outputs?[0]["confidence"] * 100).toStringAsFixed(2)}%",
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    String hastalikAdi = _outputs?[0]["label"];
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HastalikDetaySayfasi(hastalikAdi: hastalikAdi),
+                      ),
+                    );
+                  },
+                   child: const Text(
+                    "Hastalık Bilgileri",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+              ],
+            )
+                : Column(
+              children: [
+                Lottie.network(
+                  'https://lottie.host/aa670ff0-1820-4708-b5df-873cec8dc9eb/1CsXTp2leL.json', // Lottie animasyonunun URL'si
+                  width: 200,
+                  height: 200,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  _image == null
+                      ? "Sınıflandırma bekleniyor.\nLütfen bir fotoğraf seçin."
+                      : "Seçtiğiniz fotoğraf sınıflandırılamadı.\nLütfen sadece yaprak fotoğrafı seçin.",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 10.0,
+                    background: Paint()..color = Colors.green[900]!,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ), // Container
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          galeridenResimSec();
+        setState(() {
+         _showAnimation = false; // FAB'a tıklandığında animasyonun görünürlüğünü false olarak ayarladık
+         });
+         },
+        tooltip: 'resim seç',
+        child: Icon(Icons.eco_rounded),//elşe
+      ),
+    );
+  }
+}

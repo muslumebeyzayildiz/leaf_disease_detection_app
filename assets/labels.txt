@@ -1,0 +1,5 @@
+0 powdery_mildew
+1 Bacterial_spot
+2 Early_blight
+3 healthy
+4 Late_blight

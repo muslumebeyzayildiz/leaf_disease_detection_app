@@ -1,0 +1,101 @@
+/*import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+
+class CameraPage extends StatefulWidget {
+  @override
+ CameraPageState createState() => CameraPageState();
+}
+
+class CameraPageState extends State<CameraPage> {
+  late bool _loading; // Uygulama yüklendiğinde veya işlem yapıldığında kullanılacak bir yükleme durumu değişkeni
+  late List<Map<String, dynamic>> _outputs; // Model çıktıları için bir liste
+  final ImagePicker _picker = ImagePicker(); // Resim seçmek için kullanılacak ImagePicker nesnesi
+  File? _image; // Seçilen resmin dosya referansı
+  String imageUrl = ''; // Resmin URL'si (şu an kullanılmıyor gibi görünüyor)
+
+  @override
+  void initState() {
+    super.initState();
+    _loading = true; // Sayfa yüklendiğinde yükleme durumu aktif olarak ayarlanır
+
+    loadModel().then((value) {
+      setState(() {
+        _loading = false; // Model yüklendikten sonra yükleme durumu pasif hale getirilir
+      });
+    });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/vww_96_grayscale_quantized.tflite", // Modelin dosya yolu
+      labels: "assets/labels.txt", // Etiket dosyasının yolu
+    );
+  }
+
+  pickImage() async {
+    var image = await _picker.pickImage(source: ImageSource.gallery); // Galeriden resim seçilir
+    if (image == null) return; // Resim seçilmezse fonksiyon sona erer
+
+    setState(() {
+      _loading = true; // İşlem başladığında yükleme durumu aktif hale getirilir
+      _image = File(image.path); // Seçilen resmin dosya referansı atanır
+    });
+
+    classifyImage(_image!); // Seçilen resim sınıflandırılır
+  }
+
+  classifyImage(File image) async {
+    var output = await Tflite.runModelOnImage(
+      path: image.path, // Resmin dosya yolu
+      numResults: 5, // Çıktıda gösterilecek sonuç sayısı
+      threshold: 0.5, // Sonuçların eşik değeri
+    );
+
+    setState(() {
+      _loading = false; // İşlem tamamlandığında yükleme durumu pasif hale getirilir
+      _outputs = output!; // Model çıktıları _outputs listesine atanır
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _loading
+          ? Center(
+        child: CircularProgressIndicator(), // İşlem sürerken yükleme animasyonu gösterilir
+      )
+          : Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _image == null
+                ? Container() // Seçilen resim yoksa boş bir Container gösterilir
+                : Container(
+              child: Image.file(_image!), // Seçilen resim gösterilir
+              height: 200,
+            ),
+            SizedBox(height: 20),
+            _outputs.isNotEmpty
+                ? Text(
+              "${_outputs[0]["label"]}", // Modelin tahmin ettiği sonuç gösterilir
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+                : Text("Sınıflandırma bekleniyor"), // Sonuç yoksa bekleniyor mesajı gösterilir
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: pickImage,
+        tooltip: 'Resim Seç',
+        child: Icon(Icons.image),
+      ),
+    );
+  }
+}
+*/

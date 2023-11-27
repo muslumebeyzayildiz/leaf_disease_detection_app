@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "537684520386",
+    "project_id": "domates-firebase-deneme",
+    "storage_bucket": "domates-firebase-deneme.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537684520386:android:7f1adb5a8b5570b6113a5b",
+        "android_client_info": {
+          "package_name": "com.example.domates"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "537684520386-dn56004efohcn4aunr4p23u0m54kitte.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMxWgtEosugYImtdkjWdyS4gNgE7EIU9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "537684520386-dn56004efohcn4aunr4p23u0m54kitte.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "537684520386-6hbg6uknd0kvcg61g8o2oe7nci9t9l1j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.domates"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

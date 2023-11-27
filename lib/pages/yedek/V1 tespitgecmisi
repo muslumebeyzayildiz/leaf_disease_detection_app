@@ -1,0 +1,102 @@
+/*import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class TespitGecmisiSayfasi extends StatelessWidget {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tespit Geçmişi"),
+      ),
+      body: StreamBuilder(//// Firestore verilerini dinlemek için StreamBuilder kullanıyoruz
+        stream: _firestore.collection('tespitGecmisi').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          var tespitler = snapshot.data?.docs;
+          // Firestore'dan gelen belgeleri bir listeye atıyoruz.
+          return ListView.builder(
+            itemCount: tespitler?.length ?? 0,
+            itemBuilder: (context, index) {
+              var tespit = tespitler?[index];
+              var tarih = tespit?['tarih'];
+              var hastalikAdi = tespit?['hastalikAdi'];
+
+              return ListTile(
+                // Liste elemanlarını oluşturuyoruz.
+                title: Text("Tarih: $tarih"),
+                subtitle: Text("Hastalık: $hastalikAdi"),
+                onTap: () {
+                  Navigator.push(
+                    // Listeye tıklandığında detay sayfasına geçiş yapılıyor.
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TespitDetayPage(tespit: tespit),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class TespitDetayPage extends StatelessWidget {
+  final DocumentSnapshot<Object?> tespit;
+
+  TespitDetayPage({required this.tespit});
+
+  @override
+  Widget build(BuildContext context) {
+    var tarih = tespit['tarih'];
+    var hastalikAdi = tespit['hastalikAdi'];
+    var aciklama = tespit['aciklama'];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tespit Detayları"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Tarih: $tarih",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Hastalık: $hastalikAdi",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Açıklama: $aciklama",
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+*/

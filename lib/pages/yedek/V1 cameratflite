@@ -1,0 +1,184 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite/tflite.dart';
+//import 'package:firebase_storage/firebase_storage.dart';
+
+
+class cameraPage extends StatefulWidget {
+  const cameraPage({super.key});
+
+  @override
+  State<cameraPage> createState() {
+    return cameraPageState();
+  }
+}
+
+class cameraPageState extends State<cameraPage> {
+  late bool _loading;
+  late List _outputs;
+  final ImagePicker _picker = ImagePicker();
+  File? _image; //_file yüklenecek dosya
+  String imageUrl = '';
+
+  void initState() {
+    super.initState();
+    _loading = true;
+
+    loadModel().then((value) {
+      setState(() {
+        _loading = false;
+      });
+    });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/vww_96_grayscale_quantized.tflite",
+      labels: "assets/labels.txt",
+    );
+  }
+/*
+  Future<void> kameradanResimSec() async {
+    try {
+      var image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      //print(image.path); //çekilen fotonun yolunu yazsın
+      setState(() {
+        _loading = true;
+        _image = File(image
+            .path); //_file a(yüklenecek resime) kameradan alinan resmin yolu gidiyor
+      });
+
+      String uniqueFileName = DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString();
+      //Benzersiz bir dosya adı oluşturuluyor. Bu, aynı isimde dosyaların üzerine yazılmasını önler.
+      Reference referenceRoot = FirebaseStorage.instance.ref();
+      // Firebase Storage'un ana referansı alınıyor.
+      Reference referenceDirImages = referenceRoot.child('images');
+      // 'images' adlı bir klasör referansı oluşturuluyor.
+      Reference referenceImageToUpload =
+      referenceDirImages.child(uniqueFileName);
+      // Benzersiz isimli dosyanın yükleneceği referans oluşturuluyor.
+
+      try {
+        await referenceImageToUpload.putFile(File(image.path));
+        // Seçilen resim Firebase Storage'a yükleniyor.
+        imageUrl = await referenceImageToUpload.getDownloadURL();
+        // Yüklenen resmin indirme URL'si alınıyor.
+      } catch (error) {}
+    } catch (e) {
+      print(e);
+    }
+
+    sinifliResim(_image!);
+  }*/
+
+ galeridenResimSec() async {
+    var image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return null;
+    setState(() {
+      _loading = true;
+      _image = File(image.path);
+    });
+    sinifliResim(_image!);
+  }
+
+  sinifliResim(File image) async {
+    var output = await Tflite.runModelOnImage(
+      path: image.path,
+      numResults: 5,
+      threshold: 0.5,
+      imageMean: 127.5,
+      imageStd: 127.5,
+    );
+
+    setState(() {
+      _loading = false;
+      _outputs = output!;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _loading
+          ? Container(
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(),
+      ) // Container
+          : Container(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _image == null
+                ? Container() // Container
+                : Container(
+              child: Image.file(_image!),
+              height: 500,
+              width: MediaQuery.of(context).size.width - 200,
+            ), // Container
+            SizedBox(
+              height: 20,
+            ), // SizedBox
+            _outputs != null
+                ? Text(
+              "${_outputs[0]["label"]}"
+                  .replaceAll(RegExp(r' [0-9]'), ''),
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                  background: Paint()..color = Colors.white,
+                  fontWeight: FontWeight.bold), // TextStyle
+            ) // Text
+                : Text("Sınıflandırma bekleniyor")
+          ],
+        ), // Column
+      ), // Container
+      floatingActionButton: FloatingActionButton(
+        onPressed: galeridenResimSec,
+        tooltip: 'resim seç',
+        child: Icon(Icons.add),
+      ),
+
+
+      /* Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/tomato.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+               /* _file != null
+                    ? Image.file(
+                        _file!,
+                        fit: BoxFit.cover,
+                      )
+                    : const SizedBox.shrink(),
+                //SizedBox.shrink() Ebeveyninin izin verdiği ölçüde küçülecek bir kutu oluşturur.
+//TODO CVVVVVV
+                //Center(child: _loading),
+
+                ElevatedButton(
+                  child: const Text('Fotoğraf Çek'),
+                  onPressed: () {
+                    //kameradanResimSec();
+                  },
+                ),
+            */
+              ],
+            ),
+          ),
+        ),
+      ),*/
+    );
+  }
+}
