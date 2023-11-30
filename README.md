@@ -1,9 +1,8 @@
 TOMATO LEAF DISEASE DETECTION APPLICATION WITH ARTIFICIAL INTELLIGENCE TECHNIQUES
-
+YAPAY ZEKA TEKNİKLERİ İLE DOMATES YAPRAK HASTALIĞI TESPİT UYGULAMASI
 A new Flutter project.
 ## Getting Started
 
-YAPAY ZEKA TEKNİKLERİ İLE DOMATES YAPRAK HASTALIĞI TESPİT UYGULAMASI
 firebase-tools-instant-win.exe isimli dosya projenin bulunduğu dosya dizinine eklenmelidir. Dosya boyutu büyük olduğu için githuba yüklenmemiştir.
 app in içindeki build.grandle dosyasında önemli güncellemeler bulunmaktadır.
 
