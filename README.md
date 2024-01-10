@@ -8,7 +8,8 @@ A new Flutter project.
 firebase-tools-instant-win.exe isimli dosya projenin bulunduğu dosya dizinine eklenmelidir. Dosya boyutu büyük olduğu için githuba yüklenmemiştir.
 app in içindeki build.grandle dosyasında önemli güncellemeler bulunmaktadır.
 
-Yapay zeka kullanarak sınıflandırılmanın yapıldığı sayfanın videosu:
+YAPAY ZEKA KULLANILARAK SINIFLANDIRILMANIN YAPILDIĞI SAYFANIN ÇALIŞMA VİDEOSU:
+
 https://github.com/muslumebeyzayildiz/leaf_disease_detection_app/assets/103489618/85adc4af-0926-4fb9-ab09-965e0a0a63db
 
 firebase ile giriş yapılan ekran:
